@@ -20,3 +20,6 @@ sudo (echo "auth sufficient pam_tid.so\n"; cat /etc/pam.d/sudo) > /etc/pam.d/sud
 
 # Fix keyboard
 ./scripts/keyboard.sh
+
+# Create ssh key and add to GitHub account
+./scripts/ssh.sh
