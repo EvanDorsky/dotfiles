@@ -1,5 +1,5 @@
 #!/bin/bash
 
-defaults write loginwindow AutoLaunchedApplicationDictionary -array-add '{ "Path" = "~/Applications/Amethyst.app"; "Hide" = 0; }'
-defaults write loginwindow AutoLaunchedApplicationDictionary -array-add '{ "Path" = "~/Applications/Keyboard Maestro.app"; "Hide" = 0; }'
-defaults write loginwindow AutoLaunchedApplicationDictionary -array-add '{ "Path" = "~/Applications/Keyboard iTerm.app"; "Hide" = 0; }'
+osascript -e 'tell application "System Events" to make login item at end with properties {path:"/Applications/Amethyst.app", hidden:false}'
+osascript -e 'tell application "System Events" to make login item at end with properties {path:"/Applications/Keyboard Maestro.app/Contents/MacOS/Keyboard Maestro Engine.app", hidden:false}'
+osascript -e 'tell application "System Events" to make login item at end with properties {path:"/Applications/iTerm.app", hidden:false}'
