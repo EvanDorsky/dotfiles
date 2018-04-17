@@ -15,6 +15,10 @@ sudo (echo "auth sufficient pam_tid.so\n"; cat /etc/pam.d/sudo) > /etc/pam.d/sud
 # Set macOS defaults
 ./.macos
 
+# Set custom defaults
+export DOTFILES_ROOT=".dotfiles"
+# magic goes here
+
 # Set login items
 ./scripts/loginitems.sh
 
@@ -23,3 +27,7 @@ sudo (echo "auth sufficient pam_tid.so\n"; cat /etc/pam.d/sudo) > /etc/pam.d/sud
 
 # Create ssh key and add to GitHub account
 ./scripts/ssh.sh
+
+# Configure git
+git config --global user.name "Evan Dorsky"
+git config --global user.email evan.dorsky@icloud.com
