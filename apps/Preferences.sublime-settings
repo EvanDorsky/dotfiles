@@ -1,0 +1,44 @@
+{
+	"caret_style": "solid",
+	"color_scheme": "Packages/Colorsublime - Themes/Flatland_Dark.tmTheme",
+	"default_encoding": "UTF-8",
+	"default_line_ending": "unix",
+	"detect_indentation": false,
+	"enable_tab_scrolling": false,
+	"ensure_newline_at_eof_on_save": false,
+	"file_exclude_patterns":
+	[
+		".DS_Store",
+		"Desktop.ini",
+		"*.pyc",
+		"._*",
+		"Thumbs.db",
+		".Spotlight-V100",
+		".Trashes"
+	],
+	"folder_exclude_patterns":
+	[
+		".git",
+		"node_modules"
+	],
+	"font_face": "Menlo",
+	"font_size": 17,
+	"highlight_modified_tabs": true,
+	"hot_exit": false,
+	"ignored_packages":
+	[
+		"Arduino-like IDE",
+		"Markdown",
+		"Package Control",
+		"Vintage"
+	],
+	"match_brackets": true,
+	"match_brackets_angle": true,
+	"remember_open_files": false,
+	"scroll_past_end": true,
+	"show_encoding": true,
+	"tab_size": 4,
+	"theme": "Spacegray.sublime-theme",
+	"translate_tabs_to_spaces": true,
+	"word_wrap": true
+}
