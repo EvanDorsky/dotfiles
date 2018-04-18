@@ -7,10 +7,10 @@ sudo (echo "auth sufficient pam_tid.so\n"; cat /etc/pam.d/sudo) > /etc/pam.d/sud
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
 # Install useful homebrew packages
-./brew.sh
+./scripts/brew.sh
 
 # Install cask apps
-./cask.sh
+./scripts/cask.sh
 
 # Set macOS defaults
 ./.macos
