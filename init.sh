@@ -15,9 +15,12 @@ sudo (echo "auth sufficient pam_tid.so\n"; cat /etc/pam.d/sudo) > /etc/pam.d/sud
 # Set macOS defaults
 ./.macos
 
-# Set custom defaults
+# Set System defaults
 export DOTFILES_ROOT=".dotfiles"
-# magic goes here
+# TODO
+
+# Set app defaults
+# TODO
 
 # Set login items
 ./scripts/loginitems.sh
@@ -31,3 +34,4 @@ export DOTFILES_ROOT=".dotfiles"
 # Configure git
 git config --global user.name "Evan Dorsky"
 git config --global user.email evan.dorsky@icloud.com
+git config --global alias.l "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
