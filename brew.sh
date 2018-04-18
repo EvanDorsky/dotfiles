@@ -24,6 +24,7 @@ brew install tree
 brew install ag
 brew install htop
 brew install ranger
+brew install autojump
 
 # System Python is hell
 brew install python
