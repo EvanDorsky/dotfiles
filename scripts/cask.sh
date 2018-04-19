@@ -11,4 +11,5 @@ brew cask install vlc 2> /dev/null
 brew cask install xquartz 2> /dev/null
 brew cask install transmission 2> /dev/null
 brew cask install goofy 2> /dev/null
+brew cask install flux 2> /dev/null
 
