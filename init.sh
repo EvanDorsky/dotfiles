@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Enable TouchID for sudo (comment out if Mac doesn't have TouchID!)
+# If this goes wrong, can only be fixed in single user mode (since it breaks sudo)
 sudo (echo "auth sufficient pam_tid.so\n"; cat /etc/pam.d/sudo) > /etc/pam.d/sudo
 
 # Install homebrew
@@ -21,6 +22,13 @@ export DOTFILES_ROOT=".dotfiles"
 
 # Set app defaults
 # TODO
+# iTerm colors
+# Sublime settings
+# Keyboard Maestro settings and macros
+# Per-app shortcuts
+# 	Bear
+# 	...
+# ...
 
 # Set login items
 ./scripts/loginitems.sh

@@ -13,7 +13,9 @@ call plug#begin('~/.vim/plugged')
 
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-surround'
+Plug 'tpope/vim-repeat'
 Plug 'altercation/vim-colors-solarized'
+Plug 'morhetz/gruvbox'
 
 call plug#end()
 
@@ -21,7 +23,7 @@ call plug#end()
 
 syntax on
 set background=dark
-colorscheme solarized
+colorscheme gruvbox
 
 set rnu
 set cursorline
