@@ -25,8 +25,13 @@ syntax on
 set background=dark
 colorscheme gruvbox
 
+""" Display
+
 set rnu
+set nu
 set cursorline
+set title
+set incsearch " not sure what this does
 
 """ Editing
 
@@ -38,9 +43,13 @@ set backspace=indent,eol,start
 
 """ Window config
 
+" Suppress start message
 set shortmess=atI
+" Show filename
 set showmode
+" Use system clipboard
 set clipboard=unnamed
+" Better menu completion
 set wildmenu
 
 """ Housekeeping
