@@ -35,9 +35,7 @@ set incsearch " not sure what this does
 
 """ Editing
 
-set title
 set tabstop=4
-set incsearch
 set mouse=a
 set backspace=indent,eol,start
 
