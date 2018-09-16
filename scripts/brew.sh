@@ -19,6 +19,7 @@ brew install screen
 brew install imagemagick --with-webp
 brew install rename
 brew install tree
+brew install stow
 
 # And more
 brew install ag
