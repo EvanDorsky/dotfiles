@@ -58,3 +58,11 @@ if [ -z "$headless" ]; then
 	# Set macOS defaults
 	./.macos
 fi;
+
+# zsh (zsh is the default macOS shell now, so no need to install)
+./scripts/zprezto.sh
+
+# vim
+brew install stow
+stow vim -t ~
+
