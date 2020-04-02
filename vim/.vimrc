@@ -16,6 +16,7 @@ Plug 'tpope/vim-surround'
 Plug 'tpope/vim-repeat'
 Plug 'altercation/vim-colors-solarized'
 Plug 'morhetz/gruvbox'
+Plug 'ayu-theme/ayu-vim'
 
 call plug#end()
 
@@ -23,7 +24,11 @@ call plug#end()
 
 syntax on
 set background=dark
-colorscheme gruvbox
+set termguicolors
+" let ayucolor="light"
+" let ayucolor="mirage"
+let ayucolor="dark"
+colorscheme ayu
 
 """ Display
 
@@ -36,6 +41,7 @@ set incsearch " not sure what this does
 """ Editing
 
 set tabstop=4
+set shiftwidth=4
 set mouse=a
 set backspace=indent,eol,start
 

@@ -2,7 +2,6 @@
 
 brew cask install iterm2 2> /dev/null
 brew cask install keyboard-maestro 2> /dev/null
-brew cask install karabiner-elements 2> /dev/null
 brew cask install script-debugger 2> /dev/null
 brew cask install dropbox 2> /dev/null
 brew cask install sublime-text 2> /dev/null
