@@ -64,5 +64,7 @@ fi;
 
 # vim
 brew install stow
-stow vim -t ~
+
+stow vim
+stow tmux
 
