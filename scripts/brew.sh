@@ -7,16 +7,16 @@ brew update
 brew upgrade
 
 # Install `wget` with IRI support.
-brew install wget --with-iri
+brew install wget
 
 # Install more recent versions of some macOS tools.
-brew install vim --with-override-system-vi
+brew install vim
 brew install grep
 brew install openssh
 brew install screen
 
 # Install other useful binaries.
-brew install imagemagick --with-webp
+brew install imagemagick
 brew install rename
 brew install tree
 brew install stow
@@ -28,10 +28,10 @@ brew install ranger
 brew install autojump
 
 # System Python is hell
-brew install python
-brew install python@2
+# brew install python
+# brew install python@2
 
-brew install node
+# brew install node
 
 # Remove outdated versions from the cellar.
 brew cleanup

@@ -1,0 +1,57 @@
+Host station
+	HostName evan-workstation.local
+	User evan
+	ForwardX11Trusted yes
+
+Host p
+	HostName evan-psbox.local
+	User evan
+	Port 22
+	ForwardX11Trusted yes
+
+Host ss-l
+	HostName 192.168.0.2
+	User perceptive
+	ForwardX11Trusted yes
+
+Host ss-w
+	HostName 192.168.6.205
+	User perceptive
+	ForwardX11Trusted yes
+
+Host ss1
+	HostName 75.149.63.74
+	Port 6164
+	User perceptive
+	ForwardX11Trusted yes
+
+Host ss2
+	HostName 75.149.63.74
+	Port 6165
+	User perceptive
+	ForwardX11Trusted yes
+
+Host work
+	HostName work
+	User perceptive
+
+Host xavier-a
+	User nvidia
+
+Host llegion
+	HostName 192.168.7.165
+	Port 22
+	User perceptive
+
+Host legion
+	HostName 75.149.63.74
+	Port 6162
+	User perceptive
+
+Host server
+	HostName 192.168.68.105
+	User evan
+
+Host nx-home
+	HostName nx-home
+	User perceptive

@@ -11,15 +11,15 @@ fi;
 # if [ -n "$headless" ]; then
 # if [ -z "$headless" ]; then
 # Install homebrew
-/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+# /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-if [ -z "$headless" ]; then
+# if [ -z "$headless" ]; then
 	# Install useful homebrew packages
-	./scripts/brew.sh
+	# ./scripts/brew.sh
 
 	# Install cask apps
-	./scripts/cask.sh
-fi;
+	# ./scripts/cask.sh
+# fi;
 
 # Set System defaults
 export DOTFILES_ROOT=".dotfiles"
@@ -35,35 +35,34 @@ export DOTFILES_ROOT=".dotfiles"
 # 	...
 # ...
 
-if [ -z "$headless" ]; then
+# if [ -z "$headless" ]; then
 	# Sublime
-	cp apps/sublime/Preferences.sublime-settings ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/User/
+	# cp apps/sublime/Preferences.sublime-settings ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/User/
 
 	# Set login items
-	./scripts/loginitems.sh
+	# ./scripts/loginitems.sh
 
 	# Fix keyboard
-	./scripts/keyboard.sh
-fi;
+	# ./scripts/keyboard.sh
+# fi;
 
 # Create ssh key and add to GitHub account
-./scripts/ssh.sh
+# ./scripts/ssh.sh
 
 # Configure git
 git config --global user.name "Evan Dorsky"
 git config --global user.email evan.dorsky@icloud.com
 git config --global alias.lg "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
 
-if [ -z "$headless" ]; then
+# if [ -z "$headless" ]; then
 	# Set macOS defaults
-	./.macos
-fi;
+	# ./.macos
+# fi;
 
 # zsh (zsh is the default macOS shell now, so no need to install)
 ./scripts/zprezto.sh
 
 # vim
-brew install stow
 
 stow vim
 stow tmux
