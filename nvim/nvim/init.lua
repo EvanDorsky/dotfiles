@@ -4,6 +4,12 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
+-- Reload files changed on disk (e.g. by external tools) when unmodified in the buffer.
+vim.opt.autoread = true
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
+	command = "checktime",
+})
+
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -84,6 +90,11 @@ require("lazy").setup({
 		{
 			'saghen/blink.cmp',
 			version = '*'
+		},
+		{
+			'coder/claudecode.nvim',
+			dependencies = { 'folke/snacks.nvim' },
+			config = true,
 		}
 	},
 	-- Configure any other settings here. See the documentation for more details.

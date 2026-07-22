@@ -4,6 +4,8 @@ vim.keymap.set("n", "<leader>o", function ()
     require("telescope").extensions.smart_open.smart_open({ cwd_only = true })
 end, { noremap = true, silent = true })
 
+vim.keymap.set("n", "<leader>f", "<cmd>Telescope live_grep<CR>", { desc = "Grep in cwd" })
+
 -- random niceties
 vim.keymap.set("n", "<C-/>", "gcc", { remap = true, desc = "Toggle comment" })
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>', { desc = 'Hide search highlight' })
@@ -35,10 +37,20 @@ vim.keymap.set('n', '<leader>t', '<cmd>Telescope lsp_dynamic_workspace_symbols<C
 vim.keymap.set('n', '<leader>e', '<cmd>Neotree toggle reveal<CR>', { desc = 'Toggle file tree with reveal' })
 
 -- panes
-vim.keymap.set('n', '<C-h>', '<C-w>h')
-vim.keymap.set('n', '<C-j>', '<C-w>j')
-vim.keymap.set('n', '<C-k>', '<C-w>k')
-vim.keymap.set('n', '<C-l>', '<C-w>l')
+-- C-S so that pane switching can use the same without conflicting with C-l (clear) in terminal mode
+vim.keymap.set('n', '<C-S-h>', '<C-w>h')
+vim.keymap.set('n', '<C-S-j>', '<C-w>j')
+vim.keymap.set('n', '<C-S-k>', '<C-w>k')
+vim.keymap.set('n', '<C-S-l>', '<C-w>l')
+
+-- terminal → normal mode
+vim.keymap.set('t', '<C-Space>', '<C-\\><C-n>', { desc = 'Terminal to normal mode' })
+
+-- pane switching from inside a terminal
+vim.keymap.set('t', '<C-S-h>', '<C-\\><C-n><C-w>h')
+vim.keymap.set('t', '<C-S-j>', '<C-\\><C-n><C-w>j')
+vim.keymap.set('t', '<C-S-k>', '<C-\\><C-n><C-w>k')
+vim.keymap.set('t', '<C-S-l>', '<C-\\><C-n><C-w>l')
 
 vim.keymap.set('n', '<leader>sk', '<cmd>aboveleft split<CR>',   { desc = 'Split above' })
 vim.keymap.set('n', '<leader>sj', '<cmd>belowright split<CR>',  { desc = 'Split below' })
@@ -65,3 +77,15 @@ require('diffview').setup({
         },
     },
 })
+
+-- claude code
+vim.keymap.set('n', '<leader>ac', '<cmd>ClaudeCode<CR>',            { desc = 'Toggle Claude' })
+vim.keymap.set('n', '<leader>af', '<cmd>ClaudeCodeFocus<CR>',       { desc = 'Focus Claude' })
+vim.keymap.set('n', '<leader>ar', '<cmd>ClaudeCode --resume<CR>',   { desc = 'Resume Claude' })
+vim.keymap.set('n', '<leader>aC', '<cmd>ClaudeCode --continue<CR>', { desc = 'Continue Claude' })
+vim.keymap.set('n', '<leader>am', '<cmd>ClaudeCodeSelectModel<CR>', { desc = 'Select Claude model' })
+vim.keymap.set('n', '<leader>ab', '<cmd>ClaudeCodeAdd %<CR>',       { desc = 'Add current buffer' })
+vim.keymap.set('v', '<leader>as', '<cmd>ClaudeCodeSend<CR>',        { desc = 'Send selection' })
+vim.keymap.set('n', '<leader>as', '<cmd>ClaudeCodeTreeAdd<CR>',     { desc = 'Add file from tree' })
+vim.keymap.set('n', '<leader>aa', '<cmd>ClaudeCodeDiffAccept<CR>',  { desc = 'Accept diff' })
+vim.keymap.set('n', '<leader>ad', '<cmd>ClaudeCodeDiffDeny<CR>',    { desc = 'Deny diff' })

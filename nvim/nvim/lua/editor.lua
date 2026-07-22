@@ -58,6 +58,9 @@ require('neo-tree').setup {
     },
     window = {
         width = 32,
+        mappings = {
+            ["<LeftRelease>"] = "open",
+        },
     },
 }
 
