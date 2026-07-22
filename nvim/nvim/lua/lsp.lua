@@ -10,6 +10,22 @@ vim.api.nvim_create_autocmd('FileType', {
   end,
 })
 
+-- sticky header showing the function/type the cursor is inside
+require('treesitter-context').setup({
+  enable = true,
+  mode = 'cursor',           -- context of the cursor's scope, not the top visible line
+  max_lines = 3,             -- cap the header height
+  multiline_threshold = 1,   -- collapse multi-line signatures to their first line
+  trim_scope = 'outer',      -- when over max_lines, drop the outermost scopes
+  separator = '─',
+})
+
+vim.keymap.set('n', '[c', function()
+  require('treesitter-context').go_to_context(vim.v.count1)
+end, { silent = true, desc = 'Jump to enclosing context' })
+
+vim.keymap.set('n', '<leader>uc', '<cmd>TSContext toggle<CR>', { desc = 'Toggle context header' })
+
 -- golang
 vim.lsp.config('gopls', {
   cmd = { 'gopls' },

@@ -77,6 +77,10 @@ require("lazy").setup({
 		{
 			'tree-sitter-grammars/tree-sitter-lua'
 		},
+		{
+			'nvim-treesitter/nvim-treesitter-context',
+			dependencies = { 'nvim-treesitter/nvim-treesitter' },
+		},
 		{ 'sindrets/diffview.nvim' },
 		{
 			'nvim-neo-tree/neo-tree.nvim',
