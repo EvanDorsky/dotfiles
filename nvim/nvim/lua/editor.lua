@@ -15,6 +15,27 @@ vim.opt.smartindent = true
 
 vim.opt.signcolumn = 'yes:2'
 
+-- confine search highlighting to the focused window ('hlsearch' is global)
+vim.api.nvim_set_hl(0, 'NoSearchHL', {}) -- intentionally empty, so matches render as plain text
+vim.api.nvim_create_autocmd({ 'WinEnter', 'WinLeave' }, {
+    group = vim.api.nvim_create_augroup('search_hl_active_win', { clear = true }),
+    callback = function(ev)
+        if vim.bo.buftype ~= '' then return end -- leave neo-tree etc. alone
+        vim.wo.winhighlight = ev.event == 'WinLeave'
+            and 'Search:NoSearchHL,CurSearch:NoSearchHL,IncSearch:NoSearchHL'
+            or ''
+    end,
+})
+
+-- auto-enter terminal mode when focusing a terminal pane
+vim.api.nvim_create_autocmd({ 'TermOpen', 'BufEnter', 'WinEnter' }, {
+    group = vim.api.nvim_create_augroup('term_auto_insert', { clear = true }),
+    pattern = 'term://*',
+    callback = function()
+        vim.cmd.startinsert()
+    end,
+})
+
 -- treesitter
 vim.opt.foldmethod = 'expr'
 vim.opt.foldexpr = 'v:lua.vim.treesitter.foldexpr()'

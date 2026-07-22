@@ -6,3 +6,4 @@ macos-titlebar-style = hidden
 window-padding-color = extend
 shell-integration-features = no-cursor
 copy-on-select = clipboard
+keybind = global:cmd+shift+enter=new_window
