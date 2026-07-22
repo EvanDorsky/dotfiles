@@ -67,4 +67,5 @@ git config --global alias.lg "log --color --graph --pretty=format:'%Cred%h%Crese
 stow vim
 stow tmux
 stow nvim -t ../.config
+stow ghostty -t ../.config
 

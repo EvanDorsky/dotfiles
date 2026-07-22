@@ -1,0 +1,8 @@
+window-colorspace = display-p3
+theme = Ayu Mirage
+font-family = MesloLGS Nerd Font Mono
+font-size = 14
+macos-titlebar-style = hidden
+window-padding-color = extend
+shell-integration-features = no-cursor
+copy-on-select = clipboard
