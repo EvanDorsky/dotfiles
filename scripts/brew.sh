@@ -27,6 +27,11 @@ brew install htop
 brew install ranger
 brew install autojump
 
+# neovim
+brew install neovim
+brew install tree-sitter-cli
+brew install ripgrep
+
 # System Python is hell
 # brew install python
 # brew install python@2
