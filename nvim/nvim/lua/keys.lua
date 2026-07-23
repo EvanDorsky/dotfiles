@@ -57,13 +57,30 @@ vim.keymap.set('n', '<leader>sj', '<cmd>belowright split<CR>',  { desc = 'Split 
 vim.keymap.set('n', '<leader>sh', '<cmd>aboveleft vsplit<CR>',  { desc = 'Split left' })
 vim.keymap.set('n', '<leader>sl', '<cmd>belowright vsplit<CR>', { desc = 'Split right' })
 
+-- zoom: fullscreen the current pane in a new tab, toggle back to restore layout
+-- C-S so the shell keeps C-z for job suspension in terminal mode
+local function toggle_zoom()
+    if vim.t.zoomed_tab then
+        vim.cmd.tabclose()
+    else
+        vim.cmd('tab split')
+        vim.t.zoomed_tab = true
+    end
+end
+vim.keymap.set('n', '<C-S-z>', toggle_zoom, { desc = 'Toggle pane zoom' })
+vim.keymap.set('t', '<C-S-z>', function()
+    vim.cmd.stopinsert()
+    toggle_zoom()
+end, { desc = 'Toggle pane zoom' })
+
 vim.keymap.set('n', '<C-S-Up>',    '<cmd>resize +2<CR>')
 vim.keymap.set('n', '<C-S-Down>',  '<cmd>resize -2<CR>')
 vim.keymap.set('n', '<C-S-Left>',  '<cmd>vertical resize -2<CR>')
 vim.keymap.set('n', '<C-S-Right>', '<cmd>vertical resize +2<CR>')
 
 -- git
-vim.keymap.set('n', '<leader>gl', '<cmd>DiffviewFileHistory<CR>', { desc = 'git lg' })
+vim.keymap.set('n', '<leader>dh', '<cmd>DiffviewFileHistory<CR>', { desc = 'git lg' })
+vim.keymap.set('n', '<leader>do', '<cmd>DiffviewOpen<CR>',        { desc = 'git diff' })
 require('diffview').setup({
     keymaps = {
         view = {
