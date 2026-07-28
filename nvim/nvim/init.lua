@@ -53,7 +53,11 @@ require("lazy").setup({
 				'nvim-lua/plenary.nvim',
 				-- optional but recommended
 				{ 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
-			}
+			},
+			config = function()
+				-- swap the Lua fuzzy sorter for the native one in all pickers
+				require('telescope').load_extension('fzf')
+			end,
 		},
 		{
 			'shatur/neovim-ayu', version = '*'
@@ -99,6 +103,15 @@ require("lazy").setup({
 			'coder/claudecode.nvim',
 			dependencies = { 'folke/snacks.nvim' },
 			config = true,
+		},
+		{
+			'nvim-neotest/neotest',
+			dependencies = {
+				'nvim-neotest/nvim-nio',
+				'nvim-lua/plenary.nvim',
+				'nvim-treesitter/nvim-treesitter',
+				'fredrikaverpil/neotest-golang',
+			},
 		}
 	},
 	-- Configure any other settings here. See the documentation for more details.

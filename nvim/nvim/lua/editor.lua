@@ -15,6 +15,8 @@ vim.opt.smartindent = true
 
 vim.opt.signcolumn = 'yes:2'
 
+vim.opt.timeoutlen = 300
+
 -- confine search highlighting to the focused window ('hlsearch' is global)
 vim.api.nvim_set_hl(0, 'NoSearchHL', {}) -- intentionally empty, so matches render as plain text
 vim.api.nvim_create_autocmd({ 'WinEnter', 'WinLeave' }, {
@@ -83,6 +85,11 @@ require('neo-tree').setup {
             ["<LeftRelease>"] = "open",
         },
     },
+}
+
+-- neotest
+require('neotest').setup {
+    adapters = { require('neotest-golang') },
 }
 
 -- blink

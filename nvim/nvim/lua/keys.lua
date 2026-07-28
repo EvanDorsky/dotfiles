@@ -17,7 +17,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
         vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)      -- go to definition
         vim.keymap.set('n', 'K',  vim.lsp.buf.hover, opts)       -- hover docs
         vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)      -- find references
-        vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)  -- rename
+        vim.keymap.set('n', '<leader>sn', vim.lsp.buf.rename, opts)  -- rename
         vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, opts) -- code action
         vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)    -- prev diagnostic
         vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)    -- next diagnostic
@@ -94,6 +94,12 @@ require('diffview').setup({
         },
     },
 })
+
+-- tests (neotest)
+vim.keymap.set('n', '<leader>ntn', function() require('neotest').run.run() end,                  { desc = 'Run nearest test' })
+vim.keymap.set('n', '<leader>ntf', function() require('neotest').run.run(vim.fn.expand('%')) end, { desc = 'Run tests in file' })
+vim.keymap.set('n', '<leader>nto', function() require('neotest').output.open({ enter = true }) end, { desc = 'Show test output' })
+vim.keymap.set('n', '<leader>nts', function() require('neotest').summary.toggle() end,           { desc = 'Toggle test summary' })
 
 -- claude code
 vim.keymap.set('n', '<leader>ac', '<cmd>ClaudeCode<CR>',            { desc = 'Toggle Claude' })
