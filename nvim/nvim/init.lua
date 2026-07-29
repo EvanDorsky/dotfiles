@@ -55,6 +55,14 @@ require("lazy").setup({
 				{ 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
 			},
 			config = function()
+				require('telescope').setup {
+					pickers = {
+						-- default symbol_width of 25 truncates longer symbol names;
+						-- fractions scale with the results window
+						lsp_document_symbols = { symbol_width = 0.7 },
+						lsp_dynamic_workspace_symbols = { symbol_width = 0.4, fname_width = 0.35 },
+					},
+				}
 				-- swap the Lua fuzzy sorter for the native one in all pickers
 				require('telescope').load_extension('fzf')
 			end,

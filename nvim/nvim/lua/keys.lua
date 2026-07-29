@@ -81,6 +81,7 @@ vim.keymap.set('n', '<C-S-Right>', '<cmd>vertical resize +2<CR>')
 -- git
 vim.keymap.set('n', '<leader>dh', '<cmd>DiffviewFileHistory<CR>', { desc = 'git lg' })
 vim.keymap.set('n', '<leader>do', '<cmd>DiffviewOpen<CR>',        { desc = 'git diff' })
+vim.keymap.set('n', '<leader>db', '<cmd>Gitsigns blame<CR>',      { desc = 'git blame' })
 require('diffview').setup({
     keymaps = {
         view = {

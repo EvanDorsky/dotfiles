@@ -1,9 +1,9 @@
 
 -- treesitter
-require('nvim-treesitter').install({ 'lua', 'go', 'gomod', 'gosum', 'gowork' })
+require('nvim-treesitter').install({ 'lua', 'go', 'gomod', 'gosum', 'gowork', 'svelte', 'typescript', 'javascript', 'css', 'html' })
 
 vim.api.nvim_create_autocmd('FileType', {
-  pattern = { 'go', 'gomod', 'gosum', 'gowork', 'lua' },
+  pattern = { 'go', 'gomod', 'gosum', 'gowork', 'lua', 'svelte', 'typescript', 'javascript', 'css', 'html' },
   callback = function()
     vim.treesitter.start()
     vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
@@ -33,6 +33,21 @@ vim.lsp.config('gopls', {
   root_markers = { 'go.work', 'go.mod', '.git' },
 })
 vim.lsp.enable('gopls')
+
+-- svelte + typescript
+vim.lsp.config('svelte', {
+  cmd = { 'svelteserver', '--stdio' },
+  filetypes = { 'svelte' },
+  root_markers = { 'package.json', '.git' },
+})
+vim.lsp.enable('svelte')
+
+vim.lsp.config('vtsls', {
+  cmd = { 'vtsls', '--stdio' },
+  filetypes = { 'typescript', 'javascript' },
+  root_markers = { 'tsconfig.json', 'package.json', '.git' },
+})
+vim.lsp.enable('vtsls')
 
 -- highlight other instances of the symbol under the cursor
 vim.opt.updatetime = 100
@@ -76,6 +91,16 @@ vim.api.nvim_create_autocmd('BufWritePre', {
     end
 
     -- formatting: applies to both go and gomod
+    vim.lsp.buf.format({ async = false })
+  end,
+})
+
+-- svelte formatting on save (server formats via prettier-plugin-svelte,
+-- respecting the project's prettier config)
+vim.api.nvim_create_autocmd('BufWritePre', {
+  pattern = { '*.svelte' },
+  callback = function()
+    if not vim.lsp.get_clients({ bufnr = 0, name = 'svelte' })[1] then return end
     vim.lsp.buf.format({ async = false })
   end,
 })
