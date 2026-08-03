@@ -2,7 +2,7 @@
 -- splash
 vim.opt.shortmess:append('I')
 
-vim.opt.nu = true
+vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.cursorline = true
 
@@ -13,7 +13,7 @@ vim.opt.expandtab = true    -- spaces not tabs
 vim.opt.autoindent = true
 vim.opt.smartindent = true
 
-vim.opt.signcolumn = 'yes:2'
+vim.opt.signcolumn = 'yes'
 
 vim.opt.timeoutlen = 300
 
