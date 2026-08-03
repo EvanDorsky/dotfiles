@@ -30,11 +30,44 @@ vim.api.nvim_create_autocmd({ 'WinEnter', 'WinLeave' }, {
 })
 
 -- auto-enter terminal mode when focusing a terminal pane
+local term_grp = vim.api.nvim_create_augroup('term_auto_insert', { clear = true })
 vim.api.nvim_create_autocmd({ 'TermOpen', 'BufEnter', 'WinEnter' }, {
-    group = vim.api.nvim_create_augroup('term_auto_insert', { clear = true }),
+    group = term_grp,
     pattern = 'term://*',
     callback = function()
         vim.cmd.startinsert()
+    end,
+})
+
+-- horizontal wheel events are useless in a terminal (content never
+-- overflows sideways) and stray trackpad ones knock the pane out of
+-- terminal mode — disable them in every mode, buffer-locally
+vim.api.nvim_create_autocmd('TermOpen', {
+    group = term_grp,
+    pattern = 'term://*',
+    callback = function(ev)
+        for _, key in ipairs({ '<ScrollWheelLeft>', '<ScrollWheelRight>' }) do
+            for _, mode in ipairs({ 't', 'n', 'x' }) do
+                vim.keymap.set(mode, key, '<Nop>', { buffer = ev.buf })
+            end
+        end
+    end,
+})
+
+-- terminal scrollback: wheel-up pops into normal mode (nvim default, the
+-- viewport can't leave the live output while in terminal mode); scrolling
+-- back down to the bottom returns to terminal mode automatically
+vim.api.nvim_create_autocmd('CursorMoved', {
+    group = term_grp,
+    pattern = 'term://*',
+    callback = function()
+        if vim.api.nvim_get_mode().mode ~= 'n' then return end
+        local at_bottom = vim.fn.line('.') == vim.fn.line('$')
+        local was_above = vim.b.term_scrolled_up
+        vim.b.term_scrolled_up = not at_bottom
+        if at_bottom and was_above then
+            vim.cmd.startinsert()
+        end
     end,
 })
 
