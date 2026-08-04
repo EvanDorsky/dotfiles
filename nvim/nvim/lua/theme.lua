@@ -14,3 +14,6 @@ vim.api.nvim_set_hl(0, 'TreesitterContext', { bg = c.panel_bg })
 vim.api.nvim_set_hl(0, 'TreesitterContextLineNumber', { fg = c.panel_bg, bg = c.panel_bg })
 vim.api.nvim_set_hl(0, 'TreesitterContextLineNumberBottom', { fg = c.panel_bg, bg = c.panel_bg })
 vim.api.nvim_set_hl(0, 'TreesitterContextSeparator', { fg = c.panel_border })
+
+-- pane separators: ayu's default (panel_border) is near-invisible on the dark bg
+vim.api.nvim_set_hl(0, 'WinSeparator', { fg = c.ui })

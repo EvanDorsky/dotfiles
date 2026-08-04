@@ -89,6 +89,9 @@ for _, mode in ipairs({ 'insert', 'visual', 'replace', 'command', 'inactive' }) 
 end
 require('lualine').setup {
     options = {
+        -- single statusline at the bottom; horizontal splits then get thin
+        -- '─' WinSeparator lines instead of invisible statusline rows
+        globalstatus = true,
         theme = theme,
         icons_enabled = true,
         section_separators = { left = '', right = '' },
