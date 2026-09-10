@@ -1,0 +1,26 @@
+# Global fallback style for C/C++. Projects with their own .clang-format
+# override this (clang-format uses the nearest one walking up from the file).
+BasedOnStyle: LLVM
+
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 100
+
+# spaces where a human puts them
+SpaceBeforeParens: ControlStatements   # if (x)  for (...)  but foo(x)
+SpaceAfterCStyleCast: true             # (int) x
+SpaceBeforeAssignmentOperators: true
+SpacesBeforeTrailingComments: 2
+PointerAlignment: Left                 # int* p, const char* s
+
+# one statement per line; no cramming short bodies onto the declaration
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never
+
+BreakBeforeBraces: Attach
+IndentCaseLabels: true
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1

@@ -1,9 +1,9 @@
 
 -- treesitter
-require('nvim-treesitter').install({ 'lua', 'go', 'gomod', 'gosum', 'gowork', 'svelte', 'typescript', 'javascript', 'css', 'html' })
+require('nvim-treesitter').install({ 'lua', 'go', 'gomod', 'gosum', 'gowork', 'svelte', 'typescript', 'javascript', 'css', 'html', 'c', 'cpp' })
 
 vim.api.nvim_create_autocmd('FileType', {
-  pattern = { 'go', 'gomod', 'gosum', 'gowork', 'lua', 'svelte', 'typescript', 'javascript', 'css', 'html' },
+  pattern = { 'go', 'gomod', 'gosum', 'gowork', 'lua', 'svelte', 'typescript', 'javascript', 'css', 'html', 'c', 'cpp' },
   callback = function()
     vim.treesitter.start()
     vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
@@ -121,3 +121,13 @@ vim.lsp.config('clangd', {
 })
 vim.lsp.enable('clangd')
 
+-- c/c++ formatting on save (clangd formats with clang-format, using the
+-- nearest .clang-format; ~/.clang-format is the fallback for projects
+-- without their own)
+vim.api.nvim_create_autocmd('BufWritePre', {
+  pattern = { '*.c', '*.cc', '*.cpp', '*.h', '*.hpp' },
+  callback = function()
+    if not vim.lsp.get_clients({ bufnr = 0, name = 'clangd' })[1] then return end
+    vim.lsp.buf.format({ async = false })
+  end,
+})
