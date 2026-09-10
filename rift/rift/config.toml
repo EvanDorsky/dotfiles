@@ -6,10 +6,20 @@
 # - animate: master switch for all window animations
 # - animation_duration: seconds per animation (>= 0.0, typical 0.15–0.35)
 # - animation_fps: frames per second (0.0 = display refresh rate). 60–120 recommended.
+# - animation_easing: easing curve. One of:
+#   linear,
+#   ease_in_out,
+#   ease_in_sine, ease_out_sine, ease_in_out_sine,
+#   ease_in_quad, ease_out_quad, ease_in_out_quad,
+#   ease_in_cubic, ease_out_cubic, ease_in_out_cubic,
+#   ease_in_quart, ease_out_quart, ease_in_out_quart,
+#   ease_in_quint, ease_out_quint, ease_in_out_quint,
+#   ease_in_expo, ease_out_expo, ease_in_out_expo,
 #   ease_in_circ, ease_out_circ, ease_in_out_circ
 animate = false
 animation_duration = 0.3
 animation_fps = 100.0
+animation_easing = "ease_in_out"
 
 # Space activation behavior
 # - If true, spaces start inactive (rift does not manage windows there)
@@ -24,7 +34,7 @@ default_disable = false
 # - mouse_hides_on_focus: hide the mouse cursor after focusing a window
 focus_follows_mouse = false
 mouse_follows_focus = false
-mouse_hides_on_focus = true
+mouse_hides_on_focus = false
 # focus_follows_mouse_disable_hotkey temporarily suspends focus-follows-mouse while held
 # e.g. "Fn"; omit or set to null to keep focus-follows-mouse always active
 #focus_follows_mouse_disable_hotkey = "Fn"
@@ -70,10 +80,6 @@ hot_reload = true
 #	- "bsp" (binary space partitioning),
 #   - "master_stack" (master area + stack area)
 # defaults to "traditional" if omitted
-#
-# This is the default layout mode if there is nothing else configured
-# in the `workspace_rules` section below.
-# You can set different layouts per workspace using `workspace_rules`.
 mode = "bsp"
 
 # these settings only apply when layout mode == "master_stack"
@@ -86,34 +92,6 @@ master_count = 1
 master_side = "left"
 # Where new windows go when the master area is already full (master | stack | focused)
 new_window_placement = "master"
-
-# these settings only apply when layout mode == "scrolling"
-[settings.layout.scrolling]
-# width of the active column (0..1 of screen width)
-column_width_ratio = 0.7
-# min_column_width_ratio / max_column_width_ratio: clamp bounds used by resize commands
-min_column_width_ratio = 0.3
-max_column_width_ratio = 0.9
-# Alignment for the focused column: "left", "center", or "right"
-alignment = "center"
-# Horizontal focus behavior:
-# - "niri": reveal columns only when needed based on navigation direction
-# 			(disrespects alignment setting above)
-# - "anchored": always align focused column according to `alignment`
-focus_navigation_style = "niri"
-# the scrolling layout tends to function better without animations,
-# so you can disable them if you like
-# animate = false
-
-[settings.layout.scrolling.gestures]
-# Enable horizontal scroll gestures to switch columns
-enabled = false
-# Invert horizontal direction (swap left/right)
-invert_horizontal = false
-# Number of fingers required for gesture
-fingers = 3
-# If true, scrolling past the end of the strip will trigger a workspace switch
-propagate_to_workspace_swipe = false
 
 [settings.layout.stack]
 # How much of each stacked window sticks out (in pixels)
@@ -174,19 +152,19 @@ display_style = "layout"
 
 [settings.ui.stack_line]
 # experimental stack line indicator (defaults to off)
-enabled = false
+enabled = true
 # in a horizontal stack where the line will be (top/bottom)
 horiz_placement = "top"
 # in a vertical stack where the line will be (left/right)
 vert_placement = "left"
-# how thick the indicator will be (in px)
-thickness = 20.0
+# how thick the line indicator will be (in px) -- default 0 when disabled
+thickness = 0.0
 # spacing between the stack line and window edges (in px)
-spacing = 1.0
+spacing = 0.0
 
 # experimental mission control
 [settings.ui.mission_control]
-enabled = true
+enabled = false
 # enable fade animation when entering/exiting mission control
 fade_enabled = false
 # native macos mission control fade is about 180ms
@@ -223,27 +201,18 @@ drag_swap_fraction = 0.3
 [virtual_workspaces]
 # Virtual workspaces
 # - enabled: if false, rift behaves like a simple tiling WM with a single space
-# - efault_workspace_count: number of workspaces to create on startup (1–32)
+# - default_workspace_count: number of workspaces to create on startup (1–32)
 # - auto_assign_windows: when true, new windows can be auto-assigned using app_rules
 # - preserve_focus_per_workspace: remember last focused window per workspace
 # - workspace_auto_back_and_forth: when enabled, if you try to switch to the same workspace
 #   that's already active, it will switch to the last workspace instead
 # - reapply_app_rules_on_title_change: if true, app rules are re-evaluated when a window's title changes
 enabled = true
-default_workspace_count = 5
-auto_assign_windows = true
+default_workspace_count = 10
+auto_assign_windows = false
 preserve_focus_per_workspace = true
-workspace_auto_back_and_forth = false
+workspace_auto_back_and_forth = true
 reapply_app_rules_on_title_change = false
-
-# Workspace-specific rules
-# - workspace: target workspace by index (integer) or name (string)
-# - layout: layout mode to use ("traditional", "bsp", "master_stack", "scrolling")
-# workspace_rules = [
-#   { workspace = 1, layout = "bsp" },
-#   { workspace = "second", layout = "scrolling" }
-# ]
-workspace_rules = []
 
 
 # Default workspace to activate on startup (0-based index).
@@ -255,11 +224,16 @@ workspace_rules = []
 # remaining workspaces are named "Workspace X".
 # Do not provide more names than default_workspace_count.
 workspace_names = [
-	"first",
-	"second",
-	"third",
-	"fourth",
-	"fifth"
+	"0",
+	"1",
+	"2",
+	"3",
+	"4",
+	"5",
+	"6",
+	"7",
+	"8",
+	"9"
 ]
 
 # App rules (automatic assignment)
@@ -326,8 +300,23 @@ workspace_names = [
 #
 # By default there are no app rules; add or uncomment rules below as needed.
 app_rules = [
-	{ app_name = "Slack", workspace = 3 },
-	{ app_name = "Obsidian", workspace = 2 },
+  # Spark's main window has a ~1264px minimum width and its composer/reader
+  # windows a ~544px minimum; two tiled side by side exceed the screen width,
+  # which wedges the split. Tile only the main window, float the rest.
+  # { app_name = "Spark", title_regex = "^Spark - ", workspace = 4 },
+  # { app_name = "Spark", workspace = 4, floating = true },
+  { workspace = 5, app_name = "Calendar" },
+  { workspace = 5, app_name = "Things" },
+  { workspace = 6, app_name = "Messages" },
+  { workspace = 6, app_name = "Signal" },
+  # Adobe apps expose nonstandard AX windows (panels, secondary display window);
+  # tiling them wrecks the UI, so don't manage Lightroom at all
+  # { app_name = "Lightroom", manage = false },
+
+# try to exclude floating calendar popups
+# they have an empty title, I don't know how else to select for them
+# I think Amethyst was causing this bug, not rift
+  # { floating = true, title_regex = "^$", app_name = "Calendar" },
 ]
 
 # Modifier combinations that can be reused in key bindings
@@ -355,10 +344,6 @@ comb2 = "Alt + Shift + Ctrl"
 # - move_window_to_workspace = N / move_window_to_workspace = { workspace = N, window_id = 123 } (optional window id)
 # - create_workspace
 # - switch_to_last_workspace
-# - set_workspace_layout = { mode = "traditional"|"bsp"|"master_stack"|"scrolling" } (active workspace)
-# - set_workspace_layout = { workspace = N, mode = "traditional"|"bsp"|"master_stack"|"scrolling" }
-# - next_window / prev_window (focus wraps when it reaches last window in current workspace)
-# - ascend / descend
 # - move_focus = "left"|"right"|"up"|"down"
 # - move_node = "left"|"right"|"up"|"down"
 # - join_window = "left"|"right"|"up"|"down"
@@ -372,14 +357,9 @@ comb2 = "Alt + Shift + Ctrl"
 # - close_window = { window_server_id = 123 }
 # - focus_window = { window_id = 123, window_server_id = 456 }
 # - show_mission_control_all / show_mission_control_current / dismiss_mission_control (this is rift's own mission control, not macOS's)
-
 # the following commands *only* work when the master stack layout is active
 # - adjust_master_ratio = 0.05 / adjust_master_count = 1
 # - promote_to_master / swap_master_stack
-
-# the following commands *only* work when the scrolling layout is active
-# - scroll_strip = { delta = 0.5 }
-# - snap_strip / center_selection
 
 "Alt + Z" = "toggle_space_activated"
 
@@ -387,6 +367,9 @@ comb2 = "Alt + Shift + Ctrl"
 "comb1 + J" = { move_focus = "down" }
 "comb1 + K" = { move_focus = "up" }
 "comb1 + L" = { move_focus = "right" }
+
+# "comb1 + J" = { next_window = true }
+# "comb1 + K" = { prev_window = true }
 
 "comb2 + H" = { move_node = "left" }
 "comb2 + J" = { move_node = "down" }
@@ -398,27 +381,31 @@ comb2 = "Alt + Shift + Ctrl"
 "Ctrl + 3" = { switch_to_workspace = 2 }
 "Ctrl + 4" = { switch_to_workspace = 3 }
 "Ctrl + 5" = { switch_to_workspace = 4 }
+"Ctrl + 6" = { switch_to_workspace = 5 }
+"Ctrl + 7" = { switch_to_workspace = 6 }
+"Ctrl + 8" = { switch_to_workspace = 7 }
+"Ctrl + 9" = { switch_to_workspace = 8 }
+"Ctrl + 0" = { switch_to_workspace = 9 }
 
 "comb2 + 1" = { move_window_to_workspace = 0 }
 "comb2 + 2" = { move_window_to_workspace = 1 }
 "comb2 + 3" = { move_window_to_workspace = 2 }
 "comb2 + 4" = { move_window_to_workspace = 3 }
 "comb2 + 5" = { move_window_to_workspace = 4 }
+"comb2 + 6" = { move_window_to_workspace = 5 }
+"comb2 + 7" = { move_window_to_workspace = 6 }
+"comb2 + 8" = { move_window_to_workspace = 7 }
+"comb2 + 9" = { move_window_to_workspace = 8 }
+"comb2 + 0" = { move_window_to_workspace = 9 }
 
-"Alt + Tab" = "switch_to_last_workspace"
-
-# commands to change the layout engine of the active workspace
-# "Alt + Ctrl + 1" = { set_workspace_layout = { mode = "traditional" } }
-# "Alt + Ctrl + 2" = { set_workspace_layout = { mode = "bsp" } }
-# "Alt + Ctrl + 3" = { set_workspace_layout = { mode = "master_stack" } }
-# "Alt + Ctrl + 4" = { set_workspace_layout = { mode = "scrolling" } }
+# "Alt + Tab" = "switch_to_last_workspace"
 
 # "Alt + Shift + Left" = { join_window = "left" }
 # "Alt + Shift + Right" = { join_window = "right" }
 # "Alt + Shift + Up" = { join_window = "up" }
 # "Alt + Shift + Down" = { join_window = "down" }
 "Alt + Comma" = "toggle_stack"
-"comb1 + Slash" = "toggle_orientation"
+"Alt + Shift + Slash" = "toggle_orientation"
 "Alt + Ctrl + E" = "unjoin_windows"
 
 "Alt + Shift + Space" = "toggle_window_floating"
@@ -426,9 +413,8 @@ comb2 = "Alt + Shift + Ctrl"
 "Alt + Shift + F" = "toggle_fullscreen_within_gaps"
 "comb1 + Ctrl + Space" = "toggle_focus_floating" # briefly bring focus to floating window
 
-# smartly resize windows
-"comb1 + ." = "resize_window_grow"
-"comb1 + ," = "resize_window_shrink"
+"comb1 + ." = { resize_window_grow = "smart" }
+"comb1 + ," = { resize_window_shrink = "smart" }
 
 # Move mouse cursor to display by index (0-based) or UUID
 # Examples:
@@ -449,7 +435,7 @@ comb2 = "Alt + Shift + Ctrl"
 # this will show an exploded view of the windows in the active workspace
 # "Alt + Ctrl + Shift + M" = "show_mission_control_current"
 # this will show the mission control view shown in the readme
-# "Alt + Ctrl + M" = "show_mission_control_all"
+# "Alt + Shift + M" = "show_mission_control_all"
 
 "Alt + Enter" = { "exec" = ["/bin/bash", "-c", "open -a \"/System/Applications/Utilities/Terminal.app\""] }
 
