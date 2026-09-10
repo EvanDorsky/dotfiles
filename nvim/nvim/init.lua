@@ -120,7 +120,7 @@ require("lazy").setup({
 				'nvim-treesitter/nvim-treesitter',
 				'fredrikaverpil/neotest-golang',
 			},
-		}
+		},
 	},
 	-- Configure any other settings here. See the documentation for more details.
 	-- colorscheme that will be used when installing plugins.

@@ -105,3 +105,19 @@ vim.api.nvim_create_autocmd('BufWritePre', {
   end,
 })
 
+-- c/c++ (also covers PlatformIO projects; run `pio run -t compiledb` in the
+-- project root to generate compile_commands.json so clangd picks up the
+-- board's include paths and defines)
+vim.lsp.config('clangd', {
+  cmd = {
+    'clangd',
+    '--background-index',
+    -- let clangd interrogate PlatformIO cross-compilers (xtensa/riscv) for
+    -- their built-in include paths instead of assuming the host compiler's
+    '--query-driver=' .. vim.fn.expand('~') .. '/.platformio/packages/toolchain-*/bin/*',
+  },
+  filetypes = { 'c', 'cpp', 'objc', 'objcpp' },
+  root_markers = { 'compile_commands.json', 'platformio.ini', '.git' },
+})
+vim.lsp.enable('clangd')
+
