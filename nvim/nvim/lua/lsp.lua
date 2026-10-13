@@ -1,9 +1,9 @@
 
 -- treesitter
-require('nvim-treesitter').install({ 'lua', 'go', 'gomod', 'gosum', 'gowork', 'svelte', 'typescript', 'javascript', 'css', 'html' })
+require('nvim-treesitter').install({ 'lua', 'go', 'gomod', 'gosum', 'gowork', 'svelte', 'typescript', 'javascript', 'css', 'html', 'c', 'cpp', 'python' })
 
 vim.api.nvim_create_autocmd('FileType', {
-  pattern = { 'go', 'gomod', 'gosum', 'gowork', 'lua', 'svelte', 'typescript', 'javascript', 'css', 'html' },
+  pattern = { 'go', 'gomod', 'gosum', 'gowork', 'lua', 'svelte', 'typescript', 'javascript', 'css', 'html', 'c', 'cpp', 'python' },
   callback = function()
     vim.treesitter.start()
     vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
@@ -48,6 +48,14 @@ vim.lsp.config('vtsls', {
   root_markers = { 'tsconfig.json', 'package.json', '.git' },
 })
 vim.lsp.enable('vtsls')
+
+-- c/c++
+vim.lsp.config('clangd', {
+  cmd = { 'clangd' },
+  filetypes = { 'c', 'cpp', 'objc', 'objcpp' },
+  root_markers = { 'compile_commands.json', 'compile_flags.txt', '.clangd', '.git' },
+})
+vim.lsp.enable('clangd')
 
 -- highlight other instances of the symbol under the cursor
 vim.opt.updatetime = 100
