@@ -49,6 +49,37 @@ vim.lsp.config('vtsls', {
 })
 vim.lsp.enable('vtsls')
 
+-- python
+vim.lsp.config('pylsp', {
+  cmd = { 'pylsp' },
+  filetypes = { 'python' },
+  root_markers = { 'pyproject.toml', 'setup.py', 'setup.cfg', 'requirements.txt', 'Pipfile', '.git' },
+  -- no lint diagnostics; pylsp is just for completion/navigation/hover
+  settings = {
+    pylsp = {
+      plugins = {
+        pycodestyle = { enabled = false },
+        pyflakes = { enabled = false },
+        mccabe = { enabled = false },
+        pylint = { enabled = false },
+        flake8 = { enabled = false },
+        pydocstyle = { enabled = false },
+      },
+    },
+  },
+  -- point jedi at the project's .venv (uv doesn't activate it, so
+  -- VIRTUAL_ENV is usually unset when nvim starts)
+  before_init = function(_, config)
+    local venv = config.root_dir and config.root_dir .. '/.venv'
+    if venv and vim.uv.fs_stat(venv .. '/bin/python') then
+      config.settings = vim.tbl_deep_extend('force', config.settings or {}, {
+        pylsp = { plugins = { jedi = { environment = venv } } },
+      })
+    end
+  end,
+})
+vim.lsp.enable('pylsp')
+
 -- highlight other instances of the symbol under the cursor
 vim.opt.updatetime = 100
 vim.api.nvim_create_autocmd('LspAttach', {
@@ -120,14 +151,3 @@ vim.lsp.config('clangd', {
   root_markers = { 'compile_commands.json', 'compile_flags.txt', '.clangd', 'platformio.ini', '.git' },
 })
 vim.lsp.enable('clangd')
-
--- c/c++ formatting on save (clangd formats with clang-format, using the
--- nearest .clang-format; ~/.clang-format is the fallback for projects
--- without their own)
-vim.api.nvim_create_autocmd('BufWritePre', {
-  pattern = { '*.c', '*.cc', '*.cpp', '*.h', '*.hpp' },
-  callback = function()
-    if not vim.lsp.get_clients({ bufnr = 0, name = 'clangd' })[1] then return end
-    vim.lsp.buf.format({ async = false })
-  end,
-})

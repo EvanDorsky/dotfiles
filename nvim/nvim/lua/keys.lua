@@ -1,5 +1,21 @@
 
 -- quick open
+-- smart-open scans with `rg --files` (respects .gitignore) and offers no way to
+-- change the command. Its rg call is the only one that uses a `.ff-ignore`
+-- ignore file, so key off that and swap in scripts/ff-files.sh, which adds back
+-- loose gitignored files without the contents of big ignored directories.
+local uv_spawn = vim.uv.spawn
+vim.uv.spawn = function(cmd, opts, on_exit)
+    if cmd == 'rg' and opts and opts.args then
+        for _, a in ipairs(opts.args) do
+            if type(a) == 'string' and a:sub(-10) == '.ff-ignore' then
+                cmd = vim.fn.expand('~/.dotfiles/scripts/ff-files.sh')
+                break
+            end
+        end
+    end
+    return uv_spawn(cmd, opts, on_exit)
+end
 vim.keymap.set("n", "<leader>o", function ()
     require("telescope").extensions.smart_open.smart_open({ cwd_only = true })
 end, { noremap = true, silent = true })

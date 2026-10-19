@@ -114,8 +114,12 @@ require('lualine').setup {
 require('neo-tree').setup {
     close_if_last_window = true,
     filesystem = {
-        -- show gitignored and dot files dimmed instead of hiding them
-        filtered_items = { visible = true },
+        -- show gitignored and dot files dimmed instead of hiding them;
+        -- only .git and .DS_Store stay out of the way
+        filtered_items = {
+            visible = true,
+            never_show = { '.git', '.DS_Store' },
+        },
         follow_current_file = { enabled = true },
         use_libuv_file_watcher = true,
     },
@@ -134,6 +138,9 @@ require('neotest').setup {
 
 -- blink
 require('blink.cmp').setup {
+    enabled = function()
+        return vim.bo.filetype ~= 'markdown'
+    end,
     keymap = {
         preset = 'default',
         ['<Tab>']  = { 'accept', 'fallback' },
