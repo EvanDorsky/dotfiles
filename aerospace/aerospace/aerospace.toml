@@ -1,0 +1,119 @@
+# AeroSpace config — same hotkeys and workspaces as the old rift config.
+# Reference: https://nikitabobko.github.io/AeroSpace/guide
+#
+# Runs a local build (~/src/AeroSpace, branch feat/binary-tree-normalization,
+# upstream PR #2135) because upstream AeroSpace has no BSP layout. Rebuild with
+# scripts/aerospace-build.sh.
+
+config-version = 2
+start-at-login = true
+
+# All ten workspaces exist even when empty (config-version 2 no longer infers
+# these from the key bindings).
+persistent-workspaces = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+
+# BSP: every container is binary and splits along its longer side. Provided by
+# the local build; upstream AeroSpace rejects this key.
+enable-normalization-binary-tree = true
+enable-normalization-flatten-containers = true
+# i3-style: forces nested splits to alternate. In a BSP tree each split's orientation is
+# chosen when it's created and flipped with alt-shift-/, so this must stay off.
+enable-normalization-opposite-orientation-for-nested-containers = false
+
+default-root-container-layout = 'tiles'
+default-root-container-orientation = 'auto'
+
+# rift had focus_follows_mouse = false, mouse_follows_focus = false
+on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+automatically-unhide-macos-hidden-apps = false
+
+[key-mapping]
+preset = 'qwerty'
+
+[gaps]
+inner.horizontal = 0
+inner.vertical = 0
+outer.left = 0
+outer.bottom = 0
+outer.top = 0
+outer.right = 0
+
+[mode.main.binding]
+# --- focus / move (rift: comb1 = alt+shift, comb2 = alt+shift+ctrl) ---
+alt-shift-h = 'focus left'
+alt-shift-j = 'focus down'
+alt-shift-k = 'focus up'
+alt-shift-l = 'focus right'
+
+# rift's BSP move_node swaps with the neighbouring window, so a small pane can take a
+# big pane's place and vice versa. AeroSpace's `move` can only enter a neighbouring
+# container, which is one-directional.
+alt-shift-ctrl-h = 'swap left'
+alt-shift-ctrl-j = 'swap down'
+alt-shift-ctrl-k = 'swap up'
+alt-shift-ctrl-l = 'swap right'
+
+# --- workspaces (rift: ctrl+N, with workspace_auto_back_and_forth = true) ---
+ctrl-1 = 'workspace 1 --auto-back-and-forth'
+ctrl-2 = 'workspace 2 --auto-back-and-forth'
+ctrl-3 = 'workspace 3 --auto-back-and-forth'
+ctrl-4 = 'workspace 4 --auto-back-and-forth'
+ctrl-5 = 'workspace 5 --auto-back-and-forth'
+ctrl-6 = 'workspace 6 --auto-back-and-forth'
+ctrl-7 = 'workspace 7 --auto-back-and-forth'
+ctrl-8 = 'workspace 8 --auto-back-and-forth'
+ctrl-9 = 'workspace 9 --auto-back-and-forth'
+ctrl-0 = 'workspace 10 --auto-back-and-forth'
+
+alt-shift-ctrl-1 = 'move-node-to-workspace 1'
+alt-shift-ctrl-2 = 'move-node-to-workspace 2'
+alt-shift-ctrl-3 = 'move-node-to-workspace 3'
+alt-shift-ctrl-4 = 'move-node-to-workspace 4'
+alt-shift-ctrl-5 = 'move-node-to-workspace 5'
+alt-shift-ctrl-6 = 'move-node-to-workspace 6'
+alt-shift-ctrl-7 = 'move-node-to-workspace 7'
+alt-shift-ctrl-8 = 'move-node-to-workspace 8'
+alt-shift-ctrl-9 = 'move-node-to-workspace 9'
+alt-shift-ctrl-0 = 'move-node-to-workspace 10'
+
+# --- layout ---
+alt-comma = 'layout accordion tiles'          # rift toggle_stack
+alt-shift-slash = 'layout horizontal vertical' # rift toggle_orientation: flips the focused split
+alt-ctrl-e = 'flatten-workspace-tree'          # rift unjoin_windows
+alt-shift-space = 'layout floating tiling'
+alt-f = 'fullscreen'
+alt-shift-f = 'fullscreen'                     # rift fullscreen_within_gaps; gaps are 0
+alt-shift-ctrl-space = 'focus --boundaries-action wrap-around-the-workspace right'
+
+# --- resize (rift: comb1 + . / comb1 + , "smart") ---
+alt-shift-period = 'resize smart +50'
+alt-shift-comma = 'resize smart -50'
+
+# --- misc ---
+alt-enter = 'exec-and-forget open -na Ghostty'
+alt-shift-d = 'reload-config'
+
+# --- app -> workspace rules (rift app_rules were 0-based; these are 1-based) ---
+[[on-window-detected]]
+if.app-id = 'com.readdle.smartemail-Mac'
+run = 'move-node-to-workspace 5'
+
+[[on-window-detected]]
+if.app-id = 'com.adobe.LightroomClassicCC7'
+run = 'move-node-to-workspace 10'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.iCal'
+run = 'move-node-to-workspace 6'
+
+[[on-window-detected]]
+if.app-id = 'com.culturedcode.ThingsMac'
+run = 'move-node-to-workspace 6'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.MobileSMS'
+run = 'move-node-to-workspace 7'
+
+[[on-window-detected]]
+if.app-id = 'org.whispersystems.signal-desktop'
+run = 'move-node-to-workspace 7'

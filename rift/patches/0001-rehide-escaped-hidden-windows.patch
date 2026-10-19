@@ -1,0 +1,143 @@
+diff --git a/src/actor/reactor.rs b/src/actor/reactor.rs
+index 852adb9..1a08159 100644
+--- a/src/actor/reactor.rs
++++ b/src/actor/reactor.rs
+@@ -1579,6 +1579,7 @@ impl Reactor {
+             Event::WindowFrameChanged(wid, new_frame, last_seen, requested, mouse_state) => {
+                 let mission_control_active = self.is_mission_control_active();
+                 let mut effective_mouse_state = mouse_state;
++                let hidden_escape = self.hidden_window_escape_state(wid, &new_frame);
+                 if matches!(
+                     window_workflow::classify_window_frame_change(
+                         &mut self.state,
+@@ -1590,6 +1591,7 @@ impl Reactor {
+                         requested.0,
+                         &mut effective_mouse_state,
+                         mission_control_active,
++                        hidden_escape,
+                     ),
+                     window_workflow::FrameChangeDisposition::Handled
+                 ) {
+@@ -3252,6 +3254,28 @@ impl Reactor {
+         self.hidden_assigned_space_for_frame(window.info.sys_id, &window.frame_monotonic)
+     }
+ 
++    /// For a window on an inactive virtual workspace (i.e. one rift keeps off-screen),
++    /// reports whether `frame` is meaningfully on-screen (`Some(true)`, an escape) or
++    /// off-screen (`Some(false)`, hidden, possibly clamped by macOS). `None` for windows
++    /// on the active workspace or without a known space.
++    fn hidden_window_escape_state(&self, wid: WindowId, frame: &CGRect) -> Option<bool> {
++        let space = self.assigned_space_for_window_id(wid)?;
++        if self.layout_manager.layout_engine.is_window_in_active_workspace(
++            &self.state.windows,
++            space,
++            wid,
++        ) {
++            return None;
++        }
++        let screen = self.space_state.screen_by_space(space)?.frame;
++        let visible_w = (frame.max().x.min(screen.max().x) - frame.origin.x.max(screen.origin.x)).max(0.0);
++        let visible_h = (frame.max().y.min(screen.max().y) - frame.origin.y.max(screen.origin.y)).max(0.0);
++        // Hidden windows show at most a sliver (rift's own threshold is 3px; macOS
++        // clamping can leave a title bar's worth). Anything larger is an escape.
++        const ESCAPE_PX: f64 = 64.0;
++        Some(visible_w > ESCAPE_PX && visible_h > ESCAPE_PX)
++    }
++
+     fn assigned_space_for_window_id(&self, wid: WindowId) -> Option<SpaceId> {
+         self.layout_manager
+             .layout_engine
+diff --git a/src/actor/reactor/animation.rs b/src/actor/reactor/animation.rs
+index 72e0089..1e93b0e 100644
+--- a/src/actor/reactor/animation.rs
++++ b/src/actor/reactor/animation.rs
+@@ -164,6 +164,14 @@ impl AnimationManager {
+             }
+ 
+             let target_frame = target_frame.round();
++            // Windows on inactive workspaces are hidden by moving them off-screen. Apps
++            // can move them back (self-raise, AppKit re-constraining on orderFront), and
++            // some never land exactly on the requested frame, so a still-pending request
++            // for the same frame is not proof the window is hidden. Don't dedupe those.
++            let is_hidden_workspace = !reactor
++                .layout_manager
++                .layout_engine
++                .is_window_in_active_workspace(&reactor.state.windows, space, wid);
+             let (current_frame, window_server_id, txid) = {
+                 let window_store = &mut reactor.state.windows;
+                 match window_store.window_mut(wid) {
+@@ -173,7 +181,9 @@ impl AnimationManager {
+                             continue;
+                         }
+                         let wsid = window.info.sys_id;
+-                        if let Some(wsid) = wsid {
++                        if let Some(wsid) = wsid
++                            && !is_hidden_workspace
++                        {
+                             if reactor
+                                 .transaction_manager
+                                 .get_target_frame(wsid)
+@@ -322,7 +332,10 @@ impl AnimationManager {
+             if target_frame.same_as(current_frame) {
+                 continue;
+             }
+-            if let Some(wsid) = window.info.sys_id {
++            // See animate_layout: a pending request never dedupes a hidden window.
++            if let Some(wsid) = window.info.sys_id
++                && !is_hidden
++            {
+                 if reactor
+                     .transaction_manager
+                     .get_target_frame(wsid)
+diff --git a/src/actor/reactor/events/window.rs b/src/actor/reactor/events/window.rs
+index dea7b00..791ae0e 100644
+--- a/src/actor/reactor/events/window.rs
++++ b/src/actor/reactor/events/window.rs
+@@ -209,6 +209,7 @@ pub fn classify_window_frame_change(
+     requested: bool,
+     mouse_state: &mut Option<MouseState>,
+     mission_control_active: bool,
++    hidden_escape: Option<bool>,
+ ) -> FrameChangeDisposition {
+     let Some(window) = state.windows.window(wid) else {
+         query_mouse_for_active_drag(drag, mouse_state);
+@@ -240,6 +241,21 @@ pub fn classify_window_frame_change(
+             if new_frame.same_as(target) {
+                 transactions.clear_target_for_window(server);
+             }
++            match hidden_escape {
++                // Window on an inactive workspace settled at an off-screen spot that
++                // isn't the exact frame we asked for (macOS clamps windows so a title
++                // bar stays reachable). That's an acknowledgement; keeping the request
++                // pending would make every later move look like part of it.
++                Some(false) => transactions.clear_target_for_window(server),
++                // Window on an inactive workspace is back on-screen: not an ack of the
++                // hide request but an escape. Drop the request and let geometry
++                // handling arrange it off-screen again.
++                Some(true) => {
++                    transactions.clear_target_for_window(server);
++                    return FrameChangeDisposition::NeedsGeometryAnalysis;
++                }
++                None => {}
++            }
+             if let Some(window) = state.windows.window_mut(wid) {
+                 window.frame_monotonic = new_frame;
+             }
+@@ -375,7 +391,16 @@ pub fn handle_window_frame_changed(
+             outcome.drag_swap_evaluations.push((wid, new_frame));
+         }
+     } else {
+-        drag.skip_layout_for_window = Some(wid);
++        // A hidden window (inactive workspace) that moves on its own was not dragged by
++        // the user; skipping it here would leave it on-screen until the next workspace
++        // switch. Let the arrange pass requested above put it back off-screen.
++        let hidden_self_move = old_space == new_space
++            && new_space.is_some_and(|space| {
++                !layout.layout_engine.is_window_in_active_workspace(&state.windows, space, wid)
++            });
++        if !hidden_self_move {
++            drag.skip_layout_for_window = Some(wid);
++        }
+         if old_space != new_space {
+             if pending_target_space.is_some()
+                 && assigned_space == pending_target_space

@@ -152,7 +152,7 @@ display_style = "layout"
 
 [settings.ui.stack_line]
 # experimental stack line indicator (defaults to off)
-enabled = true
+enabled = false
 # in a horizontal stack where the line will be (top/bottom)
 horiz_placement = "top"
 # in a vertical stack where the line will be (left/right)
@@ -209,7 +209,7 @@ drag_swap_fraction = 0.3
 # - reapply_app_rules_on_title_change: if true, app rules are re-evaluated when a window's title changes
 enabled = true
 default_workspace_count = 10
-auto_assign_windows = false
+auto_assign_windows = true
 preserve_focus_per_workspace = true
 workspace_auto_back_and_forth = true
 reapply_app_rules_on_title_change = false
@@ -300,23 +300,22 @@ workspace_names = [
 #
 # By default there are no app rules; add or uncomment rules below as needed.
 app_rules = [
-  # Spark's main window has a ~1264px minimum width and its composer/reader
-  # windows a ~544px minimum; two tiled side by side exceed the screen width,
-  # which wedges the split. Tile only the main window, float the rest.
-  # { app_name = "Spark", title_regex = "^Spark - ", workspace = 4 },
-  # { app_name = "Spark", workspace = 4, floating = true },
-  { workspace = 5, app_name = "Calendar" },
-  { workspace = 5, app_name = "Things" },
-  { workspace = 6, app_name = "Messages" },
-  { workspace = 6, app_name = "Signal" },
-  # Adobe apps expose nonstandard AX windows (panels, secondary display window);
-  # tiling them wrecks the UI, so don't manage Lightroom at all
-  # { app_name = "Lightroom", manage = false },
-
-# try to exclude floating calendar popups
-# they have an empty title, I don't know how else to select for them
-# I think Amethyst was causing this bug, not rift
-  # { floating = true, title_regex = "^$", app_name = "Calendar" },
+  # Spark: animates its own resizes and re-raises itself; tiling it wedges the
+  # BSP split. Float the main window (rift moves it, never resizes it) and any
+  # composer/reader windows, all pinned to workspace 5.
+  { app_id = "com.readdle.smartemail-Mac", title_regex = "^Spark - ", workspace = 4, floating = true, manage = true },
+  { app_id = "com.readdle.smartemail-Mac", workspace = 4, floating = true },
+  # Lightroom Classic is ~30 windows (untitled panels, toolbars). Admit only the
+  # main window, floating; the panels are its children and follow it off-screen.
+  { app_id = "com.adobe.LightroomClassicCC7", title_regex = "Lightroom Classic", workspace = 9, floating = true, manage = true },
+  { app_id = "com.apple.iCal", workspace = 5 },
+  { app_id = "com.culturedcode.ThingsMac", workspace = 5 },
+  { app_id = "com.apple.MobileSMS", workspace = 6 },
+  { app_id = "org.whispersystems.signal-desktop", workspace = 6 },
+  # try to exclude floating calendar popups
+  # they have an empty title, I don't know how else to select for them
+  # I think Amethyst was causing this bug, not rift
+  # { floating = true, title_regex = "^$", app_id = "com.apple.iCal" },
 ]
 
 # Modifier combinations that can be reused in key bindings
@@ -437,7 +436,7 @@ comb2 = "Alt + Shift + Ctrl"
 # this will show the mission control view shown in the readme
 # "Alt + Shift + M" = "show_mission_control_all"
 
-"Alt + Enter" = { "exec" = ["/bin/bash", "-c", "open -a \"/System/Applications/Utilities/Terminal.app\""] }
+"Alt + Enter" = { "exec" = ["/usr/bin/open", "-na", "Ghostty"] }
 
 "Alt + Shift + D" = "debug" # prints layout tree
 

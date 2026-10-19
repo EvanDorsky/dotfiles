@@ -1,0 +1,182 @@
+diff --git a/Sources/AppBundle/layout/refresh.swift b/Sources/AppBundle/layout/refresh.swift
+index d33f2914..7259863b 100644
+--- a/Sources/AppBundle/layout/refresh.swift
++++ b/Sources/AppBundle/layout/refresh.swift
+@@ -190,6 +190,7 @@ private func layoutWorkspaces() async throws {
+     // to reduce flicker, first unhide visible workspaces, then hide invisible ones
+     for monitor in monitors {
+         let workspace = monitor.activeWorkspace
++        unhideAppsHiddenToEndCornerFight(onVisible: workspace)
+         workspace.allLeafWindowsRecursive.forEach { ($0 as! MacWindow).unhideFromCorner() } // todo as!
+         try await workspace.layoutWorkspace()
+     }
+diff --git a/Sources/AppBundle/tree/MacWindow.swift b/Sources/AppBundle/tree/MacWindow.swift
+index 9a1912c9..f6d01056 100644
+--- a/Sources/AppBundle/tree/MacWindow.swift
++++ b/Sources/AppBundle/tree/MacWindow.swift
+@@ -4,6 +4,11 @@ import Common
+ final class MacWindow: Window {
+     let macApp: MacApp
+     private var prevUnhiddenProportionalPositionInsideWorkspaceRect: CGPoint?
++    // Some apps (Spark) move their window back on screen whenever it's moved off screen.
++    // Every move triggers a refresh that hides it again, so the two fight and the window
++    // strobes onto the current workspace. See hideInCorner.
++    private var cornerEscapes: [ContinuousClock.Instant] = []
++    private var cornerHideBackoffUntil: ContinuousClock.Instant?
+ 
+     @MainActor
+     private init(_ id: UInt32, _ actor: MacApp, lastFloatingSize: CGSize?, parent: NonLeafTreeNodeObject, adaptiveWeight: CGFloat, index: Int) {
+@@ -122,6 +127,27 @@ final class MacWindow: Window {
+     @MainActor
+     func hideInCorner(_ corner: OptimalHideCorner) async throws {
+         guard let nodeMonitor else { return }
++        let now = ContinuousClock.now
++        if let until = cornerHideBackoffUntil, now < until { return }
++        if isHiddenInCorner {
++            // Already hidden: only move it again if the app pulled it back on screen.
++            // Re-issuing the move for windows that stayed put is what feeds the fight.
++            guard let windowRect = try await getAxRect(.cancellable) else { return }
++            if !windowRect.isMeaningfullyVisible(in: nodeMonitor.visibleRect) { return }
++            cornerEscapes = cornerEscapes.filter { now - $0 < .seconds(2) } + [now]
++            if cornerEscapes.count >= 2 {
++                cornerEscapes = []
++                if hideAppToEndCornerFight() { return }
++                // The app has windows on a visible workspace, so it can't be hidden. Stop
++                // moving the window until the app's rescue logic settles, then hide it once.
++                cornerHideBackoffUntil = now + .milliseconds(1500)
++                Task.startUnstructured { @MainActor in
++                    try? await Task.sleep(for: .milliseconds(1600))
++                    scheduleCancellableCompleteRefreshSession(.ax("cornerHideBackoffExpired"))
++                }
++                return
++            }
++        }
+         // Don't accidentally override prevUnhiddenEmulationPosition in case of subsequent `hideInCorner` calls
+         if !isHiddenInCorner {
+             guard let windowRect = try await getAxRect(.cancellable) else { return }
+@@ -151,6 +177,23 @@ final class MacWindow: Window {
+         setAxFrame(p, nil)
+     }
+ 
++    /// Hides the whole app through macOS, which no amount of window moving can undo.
++    /// Only when none of its windows are on a visible workspace, and at most once per
++    /// app per 5 seconds so an app that unhides itself can't turn this into a new loop.
++    @MainActor
++    private func hideAppToEndCornerFight() -> Bool {
++        if config.automaticallyUnhideMacosHiddenApps { return false }
++        let pid = macApp.pid
++        if let last = appsHiddenToEndCornerFight[pid], ContinuousClock.now - last < .seconds(5) { return false }
++        let appHasVisibleWindow = MacWindow.allWindows.contains {
++            $0.macApp.pid == pid && $0.nodeWorkspace?.isVisible == true
++        }
++        if appHasVisibleWindow { return false }
++        guard macApp.nsApp.hide() else { return false }
++        appsHiddenToEndCornerFight[pid] = ContinuousClock.now
++        return true
++    }
++
+     @MainActor
+     func unhideFromCorner() {
+         guard let prevUnhiddenProportionalPositionInsideWorkspaceRect else { return }
+@@ -222,6 +265,21 @@ private func unbindAndGetBindingDataForNewWindow(_ windowId: UInt32, _ macApp: M
+ private func unbindAndGetBindingDataForNewTilingWindow(_ workspace: Workspace, window: Window?) -> BindingData {
+     window?.unbindFromParent() // It's important to unbind to get correct data from below
+     let mruWindow = workspace.mostRecentWindowRecursive
++    // Binary tree: split the focused window's own tile in two, the way rift/bspwm do.
++    // Inserting next to it would make forceBinaryTree wrap the *following* siblings, so
++    // with focus on the left of [a, b] the new window would split b's tile instead.
++    if config.enableNormalizationBinaryTree,
++       let mruWindow,
++       let tilingParent = mruWindow.parent as? TilingContainer,
++       tilingParent.children.count >= 2
++    {
++        let index = mruWindow.ownIndex.orDie()
++        let weight = mruWindow.getWeight(tilingParent.orientation)
++        mruWindow.unbindFromParent()
++        let split = TilingContainer.newHTiles(parent: tilingParent, adaptiveWeight: weight, index: index)
++        mruWindow.bind(to: split, adaptiveWeight: WEIGHT_AUTO, index: 0)
++        return BindingData(parent: split, adaptiveWeight: WEIGHT_AUTO, index: 1)
++    }
+     if let mruWindow, let tilingParent = mruWindow.parent as? TilingContainer {
+         return BindingData(
+             parent: tilingParent,
+@@ -292,3 +350,36 @@ extension WindowDetectedCallback {
+         }
+     }
+ }
++
++/// Apps AeroSpace hid with macOS app-hiding to end a corner-hiding fight, and when.
++/// They're unhidden again when a workspace holding one of their windows becomes visible.
++@MainActor var appsHiddenToEndCornerFight: [Int32: ContinuousClock.Instant] = [:]
++
++@MainActor
++func unhideAppsHiddenToEndCornerFight(onVisible workspace: Workspace) {
++    for pid in Array(appsHiddenToEndCornerFight.keys) {
++        let windows = MacWindow.allWindows.filter { $0.macApp.pid == pid }
++        guard let app = windows.first?.macApp else {
++            appsHiddenToEndCornerFight.removeValue(forKey: pid) // app quit
++            continue
++        }
++        if !app.nsApp.isHidden { // user unhid it (cmd-tab, Dock)
++            appsHiddenToEndCornerFight.removeValue(forKey: pid)
++            continue
++        }
++        if windows.contains(where: { $0.nodeWorkspace === workspace }) {
++            app.nsApp.unhide()
++            appsHiddenToEndCornerFight.removeValue(forKey: pid)
++        }
++    }
++}
++
++extension Rect {
++    /// A window parked in a corner leaves at most a sliver on screen (and macOS may clamp it
++    /// a little further in). Anything larger means the app moved it back.
++    func isMeaningfullyVisible(in screen: Rect) -> Bool {
++        let w = min(maxX, screen.maxX) - max(minX, screen.minX)
++        let h = min(maxY, screen.maxY) - max(minY, screen.minY)
++        return w > 64 && h > 64
++    }
++}
+diff --git a/Sources/AppBundle/tree/TilingContainer.swift b/Sources/AppBundle/tree/TilingContainer.swift
+index 0dfb6aa5..11a3f949 100644
+--- a/Sources/AppBundle/tree/TilingContainer.swift
++++ b/Sources/AppBundle/tree/TilingContainer.swift
+@@ -5,6 +5,10 @@ final class TilingContainer: TreeNode, NonLeafTreeNodeObject { // todo consider
+     fileprivate var _orientation: Orientation
+     var orientation: Orientation { _orientation }
+     var layout: Layout
++    /// Binary-tree normalization picks a split's orientation from its aspect ratio once,
++    /// when the split is created, and leaves it alone after that (like rift/bspwm) so
++    /// `layout horizontal vertical` can flip it.
++    var binaryTreeOrientationChosen = false
+ 
+     @MainActor
+     init(parent: NonLeafTreeNodeObject, adaptiveWeight: CGFloat, _ orientation: Orientation, _ layout: Layout, index: Int) {
+@@ -32,7 +36,10 @@ extension TilingContainer {
+         if orientation == targetOrientation {
+             return
+         }
+-        if config.enableNormalizationOppositeOrientationForNestedContainers {
++        binaryTreeOrientationChosen = true
++        // In a binary tree each split is independent; flipping ancestors too would rearrange
++        // unrelated parts of the layout.
++        if config.enableNormalizationOppositeOrientationForNestedContainers && !config.enableNormalizationBinaryTree {
+             var orientation = targetOrientation
+             parentsWithSelf
+                 .filterIsInstance(of: TilingContainer.self)
+diff --git a/Sources/AppBundle/tree/normalizeContainers.swift b/Sources/AppBundle/tree/normalizeContainers.swift
+index 2d2d55a4..431f5741 100644
+--- a/Sources/AppBundle/tree/normalizeContainers.swift
++++ b/Sources/AppBundle/tree/normalizeContainers.swift
+@@ -34,7 +34,10 @@ extension TilingContainer {
+ 
+     @MainActor func normalizeBinaryTree(rect: Rect) {
+         forceBinaryTree()
+-        setOrientation(rect.width > rect.height ? .h : .v)
++        if !binaryTreeOrientationChosen {
++            setOrientation(rect.width > rect.height ? .h : .v)
++            binaryTreeOrientationChosen = true
++        }
+         switch children.count {
+             case 0: return
+             case 1:
