@@ -1,9 +1,9 @@
 
 -- treesitter
-require('nvim-treesitter').install({ 'lua', 'go', 'gomod', 'gosum', 'gowork', 'svelte', 'typescript', 'javascript', 'css', 'html', 'c', 'cpp' })
+require('nvim-treesitter').install({ 'lua', 'go', 'gomod', 'gosum', 'gowork', 'svelte', 'typescript', 'javascript', 'css', 'html', 'c', 'cpp', 'python' })
 
 vim.api.nvim_create_autocmd('FileType', {
-  pattern = { 'go', 'gomod', 'gosum', 'gowork', 'lua', 'svelte', 'typescript', 'javascript', 'css', 'html', 'c', 'cpp' },
+  pattern = { 'go', 'gomod', 'gosum', 'gowork', 'lua', 'svelte', 'typescript', 'javascript', 'css', 'html', 'c', 'cpp', 'python' },
   callback = function()
     vim.treesitter.start()
     vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
@@ -117,7 +117,7 @@ vim.lsp.config('clangd', {
     '--query-driver=' .. vim.fn.expand('~') .. '/.platformio/packages/toolchain-*/bin/*',
   },
   filetypes = { 'c', 'cpp', 'objc', 'objcpp' },
-  root_markers = { 'compile_commands.json', 'platformio.ini', '.git' },
+  root_markers = { 'compile_commands.json', 'compile_flags.txt', '.clangd', 'platformio.ini', '.git' },
 })
 vim.lsp.enable('clangd')
 

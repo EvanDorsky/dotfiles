@@ -6,9 +6,11 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.cursorline = true
 
-vim.opt.shiftwidth = 4
-vim.opt.tabstop = 4
-vim.opt.softtabstop = 4
+vim.opt.shiftwidth = 2
+vim.opt.tabstop = 2
+vim.opt.softtabstop = 2
+-- nvim's python ftplugin forces 4-space PEP 8 indent unless told not to
+vim.g.python_recommended_style = 0
 vim.opt.expandtab = true    -- spaces not tabs
 vim.opt.autoindent = true
 vim.opt.smartindent = true
@@ -100,11 +102,11 @@ require('lualine').setup {
     },
     sections = {
         lualine_a = { 'branch', 'diff' },
-        lualine_b = { 'filename' },
+        lualine_b = { { 'filename', path = 1 } },
         lualine_c = { 'diagnostics' },
         lualine_x = { 'searchcount' },
         lualine_y = { 'filetype', 'lsp_status' },
-        lualine_z = { 'hostname' },
+        lualine_z = { 'location', 'progress' },
     }
 }
 
@@ -112,6 +114,8 @@ require('lualine').setup {
 require('neo-tree').setup {
     close_if_last_window = true,
     filesystem = {
+        -- show gitignored and dot files dimmed instead of hiding them
+        filtered_items = { visible = true },
         follow_current_file = { enabled = true },
         use_libuv_file_watcher = true,
     },
